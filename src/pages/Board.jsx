@@ -7,6 +7,7 @@ import {
   stages,
 } from "../helper";
 import { Positions, Timer } from "../components";
+import { usePrevious } from "../hooks/usePrevious";
 
 const initialPositionsState = generateState(noOfPositions);
 
@@ -16,14 +17,14 @@ export const Board = () => {
   const [stage, setStage] = useState("betting");
   const [winner, setWinner] = useState(null);
 
-  const [prevPosition, setPrevPosition] = useState(null);
+  const prevPosition = usePrevious(positions);
 
   const disableBetting = stage !== "betting" || currentBalance === 0;
 
   let winningAmount = 0,
     lostAmount = 0;
 
-  const clickHandler = (position) => {
+  const positionClickHandler = (position) => {
     if (disableBetting) {
       return;
     }
@@ -37,14 +38,18 @@ export const Board = () => {
 
   const rebetHandler = () => {
     if (stage === "betting") {
+      const requiredAmountToInvest = findInvestedAmount(prevPosition);
+      if (requiredAmountToInvest > currentBalance) {
+        return;
+      }
+
       setPositions(prevPosition);
+      setCurrentBalance(currentBalance - requiredAmountToInvest);
     }
   };
 
   useEffect(() => {
     if (stage === "betting") {
-      console.log("l-", positions);
-      setPrevPosition(positions);
       setPositions(initialPositionsState);
 
       if (currentBalance === 0) {
@@ -79,23 +84,21 @@ export const Board = () => {
       />
 
       <button onClick={rebetHandler}>Rebet</button>
-      <>
-        {stage === "over" && (
-          <h3>Game is over since your current balance is 0</h3>
-        )}
 
-        <>
-          {stage === "resultTime" && (
-            <h3>{`The winning position is: ${winner}, winning amount: $${winningAmount}, lost amount: $${
-              lostAmount || 0
-            }`}</h3>
-          )}
-        </>
-      </>
+      {stage === "over" && (
+        <h3>Game is over since your current balance is 0</h3>
+      )}
+
+      {stage === "resultTime" && (
+        <h3>{`The winning position is: ${winner}, winning amount: $${winningAmount}, lost amount: $${
+          lostAmount || 0
+        }`}</h3>
+      )}
+
       <Positions
         dicePositions={positions}
         disableBetting={disableBetting}
-        clickHandler={clickHandler}
+        clickHandler={positionClickHandler}
       />
     </div>
   );
