@@ -1,0 +1,22 @@
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+.positions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.position {
+  border: 1px solid black;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  cursor: pointer;
+}
+
+.position.disable {
+  opacity: 0.5;
+}
